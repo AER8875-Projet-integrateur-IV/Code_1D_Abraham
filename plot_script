@@ -1,0 +1,19 @@
+set yrange [-50:150];
+set xrange [0:100];
+#plot './data/frame371.dat' with lines title 'test'
+#do for [i=0:594] { plot ('./data/frame%i.dat',i) with lines title 'test'; pause 1 }
+#do for [i=0:594] {
+#    set term png 
+#    outfile = sprintf("./image/frame%i.png",i)
+#    set output outfile
+#    plot ('./data/frame'.i.'.dat') with lines title 'arrière'
+
+#}
+
+set term png 
+outfile = sprintf("./image/comparaison.png")
+set output outfile
+plot ('./data/t0.087542_c1.000000_back.dat') with lines title 'arrière', \
+     ('./data/t0.087542_c1.000000_front.dat') with lines title 'avant',  \
+     ('./data/t0.087542_c1.000000_mid.dat') with lines title 'centre'
+#pause -1 "Hit any key to continue" 
