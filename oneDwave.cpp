@@ -8,6 +8,7 @@
 #include <string> 
 #include <cstdlib>
 #include "oneDwave.hpp"
+#include "SimData.hpp"
 #include <iostream>
 
 using namespace std; 
@@ -31,6 +32,7 @@ void oneDwave::initialise_mesh(){
             *(*(mesh)+i+1) = u;
         }
     }
+    data.AddSolution(mesh[0]);
     std::cout << "Mesh initialised" << std::endl;
 }
     
@@ -40,6 +42,7 @@ void oneDwave::fix_mesh_edge(int row){
 }
 
 void oneDwave::Write_Array_2_File(string method, float time, int row){
+    /*
     string title = "./data/t" + std::to_string(time) + "_c" + std::to_string(CFL) + "_" + method + ".dat";
     ofstream myfile;
     myfile.open(title);
@@ -53,30 +56,37 @@ void oneDwave::Write_Array_2_File(string method, float time, int row){
         myfile << x << ' ' << u << endl;
     }
     myfile.close();
+    */
 }
 oneDwave::oneDwave(){}
-oneDwave::oneDwave(float Length, int NumberOfKnots, float CFL_user, float velocity):oneDwave::oneDwave()
+oneDwave::oneDwave(float Length, int NumberOfKnots, float CFL_user, float velocity, float SimulationTime):oneDwave::oneDwave()
 {
     Ntot = NumberOfKnots;
     dx = Length / (Ntot - 3);
     CFL = CFL_user;
     dt = CFL * dx / velocity;   	
-    
-    mesh = new float*[2]; // dynamic array (size 10) of pointers to int
+    SimTime = SimulationTime;
+    mesh = new float*[2]; // dynamic array (size 2) of pointers to int
     for (int i = 0; i < 2; ++i) 
     {
         mesh[i] = new float[Ntot];
-    // each i-th pointer is now pointing to dynamic array (size 10) of actual int values
+    // each i-th pointer is now pointing to dynamic array of actual int values
     }
+
+    data = SimData(SimTime, NumberOfKnots, dt);
 }
 
+SimData oneDwave::get_data()
+{
+    return data;
+}
 
-void BackSolver::solve(float SimTime){
+void BackSolver::solve(){
     this->initialise_mesh();
 
     int CurrentIndex = 0;
     int LastIndex = 1;
-    float CurrentTime = 0;
+    float CurrentTime = dt;
 
     std::cout << "Start solve back" << std::endl;
 
@@ -95,13 +105,14 @@ void BackSolver::solve(float SimTime){
             mesh[CurrentIndex][i] = mesh[LastIndex][i] - CFL*(mesh[LastIndex][i]-mesh[LastIndex][i-1]);
         }    
         this->Write_Array_2_File("back", CurrentTime, CurrentIndex);
+        data.AddSolution(mesh[CurrentIndex]);
     }      
 
     std::cout << "End solve back" << std::endl;  
 }
 
 
-void FrontSolver::solve(float SimTime){
+void FrontSolver::solve(){
     this->initialise_mesh();
 
     int CurrentIndex = 0;
@@ -130,7 +141,7 @@ void FrontSolver::solve(float SimTime){
     std::cout << "End solve front" << std::endl;  
 }
 
-void MidSolver::solve(float SimTime){
+void MidSolver::solve(){
     this->initialise_mesh();
 
     int CurrentIndex = 0;

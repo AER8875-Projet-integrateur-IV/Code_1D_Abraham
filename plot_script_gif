@@ -1,0 +1,18 @@
+set yrange [-50:150];
+set xrange [0:100];
+set datafile separator " "
+
+
+Myfile='data/t.dat'
+stats Myfile
+
+do for [idx=0:STATS_blocks] {
+     set term png 
+     outfile = sprintf("./image/frame".idx.".png")
+     set output outfile
+#     set title ("test".idx)
+     plot Myfile using 1:2 index idx with lines title "CFL = 1.00", \
+          Myfile using 1:3 index idx with lines title "CFL = 0.75", \
+          Myfile using 1:4 index idx with lines title "CFL = 0.50"
+#     pause -1 "Hit any key to continue" 
+}
